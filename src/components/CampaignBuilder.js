@@ -110,10 +110,23 @@ const CampaignBuilder = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCampaign(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    if (name === 'messageContent') {
+      // Clean up any duplicate templates in the message content
+      let cleanedValue = value;
+      if (cleanedValue.includes('Hi {{customerName}}, Hi {{customerName}}')) {
+        cleanedValue = cleanedValue.replace('Hi {{customerName}}, Hi {{customerName}}', 'Hi {{customerName}}');
+      }
+      setCampaign(prev => ({
+        ...prev,
+        [name]: cleanedValue
+      }));
+    } else {
+      setCampaign(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleConditionGroupChange = (groupIndex, field, value) => {
@@ -232,7 +245,6 @@ const CampaignBuilder = () => {
         segmentId: segmentResponse.data._id,
         name: campaign.name,
         description: campaign.description,
-        messageTemplate: 'Hi {{customerName}}, {{message}}',
         messageContent: campaign.messageContent
       });
 
@@ -288,9 +300,15 @@ const CampaignBuilder = () => {
   };
 
   const handleSuggestionClick = (suggestion) => {
+    // Remove any duplicate Hi {{customerName}} if it exists in the suggestion
+    let cleanedSuggestion = suggestion;
+    if (cleanedSuggestion.includes('Hi {{customerName}}, Hi {{customerName}}')) {
+      cleanedSuggestion = cleanedSuggestion.replace('Hi {{customerName}}, Hi {{customerName}}', 'Hi {{customerName}}');
+    }
+    
     setCampaign(prev => ({
       ...prev,
-      messageContent: suggestion
+      messageContent: cleanedSuggestion
     }));
     setMessageSuggestions([]);
   };
